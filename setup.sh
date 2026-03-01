@@ -11,22 +11,33 @@ declare -A FLAGS=()
 declare -A PASSWORDS=()
 
 ensure_dependencies() {
-  require_command python3
+  local manager
+  manager="$(detect_package_manager)"
+  if [[ "${manager}" == "unknown" ]]; then
+    die "Distribucion no soportada automaticamente. Usa Debian-based o Arch."
+  fi
+
   require_command awk
   require_command sed
   require_command find
   require_command grep
   require_command tar
   require_command gzip
-  require_command unzip
-  require_command ss
   require_command useradd
   require_command chpasswd
   require_command systemctl
 
-  ensure_apt_package openssh-server
-  ensure_apt_package netcat-openbsd
-  ensure_apt_package zip
+  ensure_package openssh-server
+  ensure_package netcat
+  ensure_package zip
+  ensure_package unzip
+  ensure_package net-tools
+  ensure_package gcc
+
+  require_command python3
+  require_command unzip
+  require_command ss
+  require_command nc
 }
 
 init_lab_dirs() {

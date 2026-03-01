@@ -75,7 +75,8 @@ ensure_file() {
   local mode="$3"
   local owner="$4"
   local group="$5"
-  printf "%s" "${content}" >"${path}"
+  # Interpret escaped newlines so callers can pass multiline content safely.
+  printf "%b" "${content}" >"${path}"
   chown "${owner}:${group}" "${path}"
   chmod "${mode}" "${path}"
 }
@@ -150,6 +151,91 @@ ensure_apt_package() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -y >/dev/null
   apt-get install -y "${pkg}"
+}
+
+detect_package_manager() {
+  if command -v apt-get >/dev/null 2>&1; then
+    printf "apt"
+    return 0
+  fi
+  if command -v pacman >/dev/null 2>&1; then
+    printf "pacman"
+    return 0
+  fi
+  printf "unknown"
+}
+
+ensure_pacman_package() {
+  local pkg="$1"
+  if pacman -Q "${pkg}" >/dev/null 2>&1; then
+    return 0
+  fi
+  log_info "Instalando dependencia: ${pkg}"
+  pacman -Sy --noconfirm --needed "${pkg}"
+}
+
+ensure_pacman_any_of() {
+  local selected=""
+  local candidate
+  for candidate in "$@"; do
+    if pacman -Q "${candidate}" >/dev/null 2>&1; then
+      selected="${candidate}"
+      break
+    fi
+    if pacman -Si "${candidate}" >/dev/null 2>&1; then
+      selected="${candidate}"
+      break
+    fi
+  done
+
+  if [[ -z "${selected}" ]]; then
+    die "No se encontro ningun paquete compatible en pacman: $*"
+  fi
+
+  ensure_pacman_package "${selected}"
+}
+
+ensure_package() {
+  local logical_pkg="$1"
+  local manager
+  manager="$(detect_package_manager)"
+  case "${manager}" in
+    apt)
+      case "${logical_pkg}" in
+        openssh-server|netcat|zip|unzip|net-tools|gcc) ;;
+        *)
+          die "Paquete logico no soportado en apt: ${logical_pkg}"
+          ;;
+      esac
+      case "${logical_pkg}" in
+        openssh-server) ensure_apt_package "openssh-server" ;;
+        netcat) ensure_apt_package "netcat-openbsd" ;;
+        zip) ensure_apt_package "zip" ;;
+        unzip) ensure_apt_package "unzip" ;;
+        net-tools) ensure_apt_package "net-tools" ;;
+        gcc) ensure_apt_package "gcc" ;;
+      esac
+      ;;
+    pacman)
+      case "${logical_pkg}" in
+        openssh-server|netcat|zip|unzip|net-tools|gcc) ;;
+        *)
+          die "Paquete logico no soportado en pacman: ${logical_pkg}"
+          ;;
+      esac
+      case "${logical_pkg}" in
+        openssh-server) ensure_pacman_package "openssh" ;;
+        netcat) ensure_pacman_any_of "openbsd-netcat" "gnu-netcat" ;;
+        zip) ensure_pacman_package "zip" ;;
+        unzip) ensure_pacman_package "unzip" ;;
+        net-tools) ensure_pacman_package "net-tools" ;;
+        gcc) ensure_pacman_package "gcc" ;;
+      esac
+      ;;
+    *)
+      die "No se detecto gestor soportado. Usa Debian/Ubuntu/Kali/Parrot o Arch."
+      ;;
+  esac
 }
 
 ensure_ssh_dropin_enabled() {

@@ -8,14 +8,16 @@ Laboratorio local tipo OverTheWire/Bandit para entrenamiento Linux en CTF y pent
 - Progresion por SSH local: la flag del nivel `N` es la password de `dw(N+1)`.
 - Provisioning idempotente y seguro con `setup.sh`.
 - Scripts operativos incluidos: `reset.sh`, `scoreboard.sh`, `check_progress.sh`, `verify_lab.sh`.
-- Compatible con Debian/Kali/Parrot/Ubuntu.
+- Compatible con Debian/Kali/Parrot/Ubuntu y Arch Linux.
 
 ## Requisitos
 
-- Sistema Debian-based.
+- Sistema Debian-based o Arch Linux.
 - Privilegios `root` o `sudo`.
 - Herramientas base Linux + `python3`.
-- `openssh-server` y `netcat-openbsd` (se instalan automaticamente si faltan).
+- Dependencias instaladas automaticamente segun distro:
+  - Debian/Kali/Parrot/Ubuntu: `openssh-server`, `netcat-openbsd`, `zip`, `unzip`, `net-tools`, `gcc`
+  - Arch: `openssh`, `openbsd-netcat` (o `gnu-netcat` si aplica), `zip`, `unzip`, `net-tools`, `gcc`
 
 ## Estructura del proyecto
 

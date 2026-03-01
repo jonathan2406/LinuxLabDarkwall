@@ -93,6 +93,9 @@ check_level_artifacts() {
 
 main() {
   load_config
+  if [[ "${EUID}" -ne 0 ]]; then
+    die "Ejecuta verify_lab.sh con sudo para validar rutas protegidas (ej: sudo bash verify_lab.sh)."
+  fi
   check_file "${LAB_BASE_DIR}"
   check_file "${LAB_DATA_DIR}"
   check_file "${LAB_META_DIR}"
