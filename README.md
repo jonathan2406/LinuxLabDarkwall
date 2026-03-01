@@ -23,6 +23,7 @@ Laboratorio local tipo OverTheWire/Bandit para entrenamiento Linux en CTF y pent
 
 - `setup.sh`: provision completa del laboratorio.
 - `reset.sh`: reconstruccion segura del entorno del lab.
+- `destroy.sh`: desinstalacion completa del laboratorio.
 - `scoreboard.sh`: tablero de progreso por usuario.
 - `check_progress.sh`: envio/consulta de progreso por flag.
 - `verify_lab.sh`: verificacion de consistencia del laboratorio.
@@ -97,6 +98,20 @@ sudo bash reset.sh
 ```
 
 `reset.sh` solo limpia y reconstruye rutas bajo `/opt/darkwall_lab` y contenido de niveles en `/home/dw*`, sin operaciones destructivas fuera del alcance del laboratorio.
+
+## Desinstalacion completa
+
+Para eliminar completamente el laboratorio (usuarios `dw*`, datos y configuracion SSH del lab):
+
+```bash
+sudo bash destroy.sh
+```
+
+Modo no interactivo (sin confirmacion):
+
+```bash
+sudo bash destroy.sh --force
+```
 
 ## Seguridad y buenas practicas
 
